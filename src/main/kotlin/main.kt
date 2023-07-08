@@ -45,6 +45,25 @@ data class Video(
     val title:String,
     val duration:Int
 )
+data class Audio(
+    val id: Int,
+    val ownerId: Int,
+    val title:String,
+    val duration:Int,
+    val url:String
+)
+data class File(
+    val id: Int,
+    val ownerId: Int,
+    val title:String,
+    val size:Int,
+    val ext:String,
+    val url:String
+)
+data class Sticker(
+    val productId: Int,
+    val stickerId: Int,
+)
 
 data class PhotoAttachment(val photo: Photo):Attachment{
     override val type="photo"
@@ -52,6 +71,16 @@ data class PhotoAttachment(val photo: Photo):Attachment{
 
 data class VideoAttachment(val vide: Video):Attachment{
     override val type="video"
+}
+
+data class AudioAttachment(val audio: Audio):Attachment{
+    override val type="audio"
+}
+data class FileAttachment(val file: File):Attachment{
+    override val type="file"
+}
+data class StickerAttachment(val sticker: Sticker):Attachment{
+    override val type="sticker"
 }
 
 object WallService {
