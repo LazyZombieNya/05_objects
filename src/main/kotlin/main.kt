@@ -3,12 +3,15 @@ data class Post(
     val ownerId: Int,//Идентификатор владельца стены
     val date: Int,//Время публикации записи в формате unixtime
     val text: String,//Текст записи
-    val replyOwnerId: Int,//Идентификатор владельца записи
+    val replyOwnerId: Int?,//Идентификатор владельца записи
     val replyPostId: Int,//Идентификатор записи
     val isFavorite: Boolean,//true, если объект добавлен в закладки у текущего пользователя
     val canEdit: Boolean,//Информация о том, может ли текущий пользователь редактировать запись
     val comments: Comments,//Информация о комментариях к записи
     val likes: Likes = Likes(),//Информация о лайках к записи
+    val attachment: Array<Attachment> = arrayOf(PhotoAttachment(
+        Photo(1,2,"https://vk.com/some_photo_link","https://vk.com/another_photo_link")),
+        VideoAttachment(Video(1,2,"A Funny Video",30)))
 )
 
 data class Comments(
@@ -26,6 +29,30 @@ data class Likes(
     val canPublish: Boolean = true,//информация о том, может ли текущий пользователь сделать репост записи
 )
 
+interface Attachment {
+    val type:String
+}
+
+data class Photo(
+    val id: Int,
+    val ownerId: Int,
+    val photo130:String,
+    val photo604:String
+)
+data class Video(
+    val id: Int,
+    val ownerId: Int,
+    val title:String,
+    val duration:Int
+)
+
+data class PhotoAttachment(val photo: Photo):Attachment{
+    override val type="photo"
+}
+
+data class VideoAttachment(val vide: Video):Attachment{
+    override val type="video"
+}
 
 object WallService {
     private var posts = emptyArray<Post>()
