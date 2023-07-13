@@ -8,6 +8,7 @@ data class Post(
     val isFavorite: Boolean,//true, если объект добавлен в закладки у текущего пользователя
     val canEdit: Boolean,//Информация о том, может ли текущий пользователь редактировать запись
     val comments: Comments,//Информация о комментариях к записи
+    val comment: Comment,//комментарий к записи
     val likes: Likes = Likes(),//Информация о лайках к записи
     val attachment: Array<Attachment> = arrayOf(PhotoAttachment(
         Photo(1,2,"https://vk.com/some_photo_link","https://vk.com/another_photo_link")),
@@ -20,6 +21,12 @@ data class Comments(
     val groupsCanPost: Boolean = true,//могут ли сообщества комментировать запись
     val canClose: Boolean = true,//может ли текущий пользователь закрыть комментарии к записи
     val canOpen: Boolean = true,//может ли текущий пользователь открыть комментарии к записи
+)
+data class Comment(
+    var id: Int = 0,//Идентификатор комментария.
+    val fromId: Int = 0,//Идентификатор автора комментария.
+    val text: String = ""//Текст комментария.
+
 )
 
 data class Likes(
@@ -86,10 +93,22 @@ data class StickerAttachment(val sticker: Sticker):Attachment{
 object WallService {
     private var posts = emptyArray<Post>()
     private var lastId = 0
+    private var comments = emptyArray<Comment>()
 
     fun addPost(post: Post): Post {
-        posts += post.copy(id = ++lastId, comments = post.comments.copy(), likes = post.likes.copy())
+        posts += post.copy(id = ++lastId, comment=post.comment.copy(), comments = post.comments.copy(), likes = post.likes.copy())
         return posts.last()
+    }
+
+    fun createComment(postId: Int, comment: Comment): Comment {
+        for ((index, post) in posts.withIndex()) {
+            if (post.id == postId) {
+                comments+= comment
+                return comment
+            }
+        }
+        throw PostNotFoundException("No post with $postId")
+
     }
 
     fun update(newPost: Post): Boolean {
@@ -114,29 +133,38 @@ object WallService {
         posts = emptyArray()
         lastId = 0
     }
+
+
 }
 
+class PostNotFoundException(message: String):RuntimeException(message)
 
 fun main() {
     WallService.addPost(
         Post(
             1, 33, 1687545918, "Привет!", 1, 26, true, true,
-            Comments(28), Likes(36)
+            Comments(28),Comment(0,0,""), Likes(36)
         )
     )
     WallService.addPost(
         Post(
             2, 33, 1687545920, "Как жела?", 1, 26, true, true,
-            Comments(30), Likes(50)
+            Comments(30), Comment(0,0,""),Likes(50)
         )
     )
     println(
         WallService.update(
             Post(
                 2, 33, 1687545920, "Как дела?", 1, 26, true, true,
-                Comments(30), Likes(50)
+                Comments(30),Comment(0,0,""), Likes(50)
             )
         )
     )
+    WallService.createComment(1,
+        Comment(
+            1, 1,"Первый!"
+        )
+    )
+
     WallService.print()
 }
